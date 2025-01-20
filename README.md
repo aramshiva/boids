@@ -1,3 +1,4 @@
+![ScreenShot 2025-01-19 at 18 17 25@2x](https://github.com/user-attachments/assets/97095bb2-f35f-4f95-97c9-bf18f8aee976)
 # Boids!
 Boids is an artificial life program, developed by [Craig Reynolds](https://www.red3d.com/cwr/) in 1986, which simulates the flocking behaviour of birds, and related group motion.
 
