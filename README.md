@@ -10,7 +10,8 @@ Boids run on pygame (an python library for making 2D graphics in python) to run 
 ## Running locally!
 > [!WARNING]  
 > This code may use up to 1GB or ram depending on boid count, and will take up threads. You were warned!
-So you want to play it! Here's the steps:
+So you want to play it!
+Here's the steps:
 - Clone the repo
 - Download python3 (if you don't have it already)
 - Open your terminal app and change the directory to this folder and run the following:
