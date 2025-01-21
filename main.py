@@ -257,7 +257,6 @@ while running:
             elif event.key == pygame.K_c:
                 BOID_COLOR = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
                 for boid in boids: boid.color = BOID_COLOR
-                print("ACTION_COLOR_SET:", BOID_COLOR[0] + BOID_COLOR[1] + BOID_COLOR[2])
             elif event.key == pygame.K_b:
                 if BOID_TYPE == "triangle":
                     BOID_TYPE = "circle"

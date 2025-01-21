@@ -31,4 +31,4 @@ pip install -r requirements.txt
 `CLICK` - Add boid
 `-` - Remove boids
 `B` - Change boid mode (different filters and styles!)
-`K` - Change color of boids
+`C` - Change color of boids
