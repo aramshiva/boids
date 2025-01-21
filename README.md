@@ -15,7 +15,7 @@ Boids uses three simple rules to work accurately:
 - [`numpy`](https://numpy.org/) is used to run more complex mathmatical calculations to caclulate boids three rules.
 - [`GitHub Copilot`](https://github.com/features/copilot) was used to optimize my bad math calculations + adding multithreading.
 
-## Run Yourself!
+## Run it Yourself!
 That's cool and all but how do I run it myself?
 > [!WARNING]
 > This code uses a lot (~1GB) of RAM and threads. This is due to how the optimization techniques work and I do not guarantee it will work on your local machine, if it doesn't post a GitHub issue but I can't promise anything
