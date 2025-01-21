@@ -2,21 +2,32 @@
 # Boids!
 Boids is an artificial life program, developed by [Craig Reynolds](https://www.red3d.com/cwr/) in 1986, which simulates the flocking behaviour of birds, and related group motion.
 
-It can be great for simulating something like a flock of birds (hence the name boids) or a school of fish.
+Boids uses three simple rules to work accurately:
+- separation: steer to avoid crowding local flockmates
+- alignment: steer towards the average heading of local flockmates
+- cohesion: steer to move towards the average position (center of mass) of local flockmates
+
+### TL;DR Boids is a program that can create really cool swarm intelligences and can simulate basically real flocks of birds, schools of fish and stuff like that.
 
 ## Technology
-Boids run on pygame (an python library for making 2D graphics in python) to run the visual simulation, the code also uses numpy for math calculations. I used Copilot to optimize math calculations + multithreading as it would consume lots of RAM before + was slow on older machines
+-The visual/graphics run on [`pygame`](https://pygame.org) (An python library to make 2D graphics.python) to run the visuals. 
+- [`numpy`](https://numpy.org/) is used to run more complex mathmatical calculations to caclulate boids three rules.
+- [`GitHub Copilot`](https://github.com/features/copilot) was used to optimize my bad math calculations + adding multithreading.
 
-## Running locally!
-> [!WARNING]  
-> This code may use up to 1GB or ram depending on boid count, and will take up threads. You were warned!
-So you want to play it!
-Here's the steps:
-- Clone the repo
-- Download python3 (if you don't have it already)
-- Open your terminal app and change the directory to this folder and run the following:
-    ```
-    pip3 install numpy
-    pip3 install python3
-    ```
-- Then run `python3 main.py`. You can press `r` to add boids and `-` to remove boids. Click to add a singular boid, you can also click `b` to change the boids appearance.
+## Run Yourself!
+That's cool and all but how do I run it myself?
+> [!WARNING]
+> This code uses a lot (~1GB) of RAM and threads. This is due to how the optimization techniques work and I do not guarantee it will work on your local machine, if it doesn't post a GitHub issue but I can't promise anything
+- Make sure you have [Python](https://www.python.org/) installed.
+- Next, clone the repo and move to that directory.
+- Run: 
+```
+pip install -r requirements.txt
+```
+- Last, run `python3 main.py`!
+
+### Controls
+`R` - Add Boids
+`CLICK` - Add Boid
+`-` - Remove Boids
+`B` - Change Boid Mode (different filters and styles!)
