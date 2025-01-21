@@ -27,7 +27,8 @@ pip install -r requirements.txt
 - Last, run `python3 main.py`!
 
 ### Controls
-`R` - Add Boids
-`CLICK` - Add Boid
-`-` - Remove Boids
-`B` - Change Boid Mode (different filters and styles!)
+`R` - Add boids
+`CLICK` - Add boid
+`-` - Remove boids
+`B` - Change boid mode (different filters and styles!)
+`K` - Change color of boids
