@@ -32,3 +32,22 @@ pip install -r requirements.txt
 `-` - Remove boids
 `B` - Change boid mode (different filters and styles!)
 `C` - Change color of boids
+
+### Change stats
+Well, the code is open-source! So you can play around with it, if you want a low-code solution check out the ALL CAPS variables at the top of `main.py` to edit them, the names are pretty self explanatory. Here are the defaults:
+```
+COLORS = {"BLUE": (12, 18, 226),"RED": (255, 0, 0),"GREEN": (0, 255, 0),"YELLOW": (255, 255, 0),"ORANGE": (255, 165, 0),"PURPLE": (128, 0, 128),"PINK": (255, 192, 203),"CYAN": (0, 255, 255),"WHITE": (255, 255, 255),"BLACK": (0, 0, 0),"GRAY": (128, 128, 128),"BROWN": (165, 42, 42), "GRAY": (128, 128, 128)}
+HEIGHT = 750
+WIDTH = 1250
+BG_COLOR = (255, 255, 255)
+VISION_COLOR = (200, 200, 200)
+SHOW_VISION = False
+BOID_SIZE = 5
+BOID_TYPE = "lights"
+VISION_RADIUS = 20
+BOIDS_COUNT = 1000
+TRANSPARENCY_VALUE = 5
+BOID_COLOR = COLORS["RED"]
+```
+To change a color use an RGB format, some preset colors can be pasted in:
+`# COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"]`
