@@ -51,4 +51,15 @@ TRANSPARENCY_VALUE = 5
 BOID_COLOR = COLORS["RED"]
 ```
 To change a color use an RGB format, some preset colors can be pasted in:
-`# COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"], COLORS["BLUE"]`
+- `COLORS["BLUE"]`
+- `COLORS["RED"]`
+- `COLORS["GREEN"]`
+- `COLORS["YELLOW"]`
+- `COLORS["ORANGE"]`
+- `COLORS["PURPLE"]`
+- `COLORS["PINK"]`
+- `COLORS["CYAN"]`
+- `COLORS["WHITE"]`
+- `COLORS["BLACK"]`
+- `COLORS["GRAY"]`
+- `COLORS["BROWN"]`
