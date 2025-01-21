@@ -7,22 +7,24 @@ import threading
 
 pygame.init()
 
+COLORS = {"BLUE": (12, 18, 226),"RED": (255, 0, 0),"GREEN": (0, 255, 0),"YELLOW": (255, 255, 0),"ORANGE": (255, 165, 0),"PURPLE": (128, 0, 128),"PINK": (255, 192, 203),"CYAN": (0, 255, 255),"WHITE": (255, 255, 255),"BLACK": (0, 0, 0),"GRAY": (128, 128, 128),"BROWN": (165, 42, 42), "GRAY": (128, 128, 128)}
 HEIGHT = 750
 WIDTH = 1250
 BG_COLOR = (255, 255, 255)
 VISION_COLOR = (200, 200, 200)
 SHOW_VISION = False
 BOID_SIZE = 5
-BOID_TYPE = "square"
+BOID_TYPE = "lights"
 VISION_RADIUS = 20
 BOIDS_COUNT = 1000
 TRANSPARENCY_VALUE = 5
+BOID_COLOR = COLORS["RED"]
 
 class Grid:
     def __init__(self, cell_size):
         self.cell_size = cell_size
         self.grid = defaultdict(list)
-        self.max_flock_size = int(BOIDS_COUNT * 0.3)
+        self.max_flock = int(BOIDS_COUNT * 0.3)
     
     def get_cell_coords(self, pos):
         return (int(pos['x'] // self.cell_size), int(pos['y'] // self.cell_size))
@@ -31,14 +33,13 @@ class Grid:
         cell = self.get_cell_coords(boid.pos)
         self.grid[cell].append(boid)
     
-    def get_neighbors(self, boid):
+    def neighbors(self, boid):
         cell = self.get_cell_coords(boid.pos)
         neighbors = []
-        for dx in [-1, 0, 1]:
-            for dy in [-1, 0, 1]:
-                neighbors.extend(self.grid.get((cell[0] + dx, cell[1] + dy), []))
+        neighbor_cells = [(cell[0] + dx, cell[1] + dy) for dx in [-1, 0, 1] for dy in [-1, 0, 1]]
+        neighbors = [boid for neighbor_cell in neighbor_cells for boid in self.grid.get(neighbor_cell, [])]
         flock = [n for n in neighbors if n != boid]
-        if len(flock) > self.max_flock_size:
+        if len(flock) > self.max_flock:
             return []
         return flock
 
@@ -53,7 +54,7 @@ class Boid:
         self.size = BOID_SIZE
         self.angle = math.atan2(self.velocity['y'], self.velocity['x'])
         self.cached_neighbors = []
-        self.color = (random.randint(50, 255), random.randint(50, 255), random.randint(50, 255))
+        self.color = BOID_COLOR
         self.points = self.generate_points()
 
     def generate_points(self):
@@ -92,6 +93,26 @@ class Boid:
                  self.pos['y'] + self.size * math.sin(self.angle - 2.6))
             ]
             pygame.draw.polygon(surface, self.color, points)
+        if BOID_TYPE == "lights":
+            BG_COLOR = (3, 8, 172)
+            # BOID_COLOR = (12, 18, 226)
+            points = [
+            (self.pos['x'] + self.size * math.cos(self.angle),
+             self.pos['y'] + self.size * math.sin(self.angle)),
+            (self.pos['x'] + self.size * math.cos(self.angle + 2.6),
+             self.pos['y'] + self.size * math.sin(self.angle + 2.6)),
+            (self.pos['x'] + self.size * math.cos(self.angle - 2.6),
+             self.pos['y'] + self.size * math.sin(self.angle - 2.6))
+            ]
+            flock_size = len(self.cached_neighbors)
+            intensity = min(255, 50 + flock_size * 5)
+            color1, color2, color3 = self.color
+            flock_color = (
+            min(255, color1 + intensity),
+            min(255, color2 + intensity),
+            min(255, color3 + intensity)
+            )
+            pygame.draw.polygon(surface, flock_color, points)
         elif BOID_TYPE == "exp":
             points = [
                 (self.pos['x'] + point[0], self.pos['y'] + point[1])
@@ -188,7 +209,7 @@ class Boid:
             self.pos['y'] = HEIGHT + self.size
         elif self.pos['y'] > HEIGHT + self.size:
             self.pos['y'] = -self.size
-
+    
 boids = [Boid(random.randint(1, WIDTH), random.randint(1, HEIGHT)) for _ in range(BOIDS_COUNT)]
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
@@ -203,9 +224,9 @@ def update_boids():
         for boid in boids:
             grid.update_boid(boid)
         for boid in boids:
-            boid.cached_neighbors = grid.get_neighbors(boid)
+            boid.cached_neighbors = grid.neighbors(boid)
             boid.update(boid.cached_neighbors)
-        pygame.time.wait(10)
+        pygame.time.Clock().tick(60)
 
 def draw_boids():
     while running:
@@ -213,7 +234,6 @@ def draw_boids():
         for boid in boids:
             boid.draw(screen)
         pygame.display.flip()
-        pygame.time.wait(10)
 
 update_thread = threading.Thread(target=update_boids)
 draw_thread = threading.Thread(target=draw_boids)
@@ -234,12 +254,25 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_v:
                 SHOW_VISION = not SHOW_VISION
+            elif event.key == pygame.K_c:
+                BOID_COLOR = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                for boid in boids: boid.color = BOID_COLOR
+                print("ACTION_COLOR_SET:", BOID_COLOR[0] + BOID_COLOR[1] + BOID_COLOR[2])
             elif event.key == pygame.K_b:
                 if BOID_TYPE == "triangle":
                     BOID_TYPE = "circle"
                 elif BOID_TYPE == "circle":
                     BOID_TYPE = "square"
+                elif BOID_TYPE == "square":
+                    BOID_TYPE = "lights"
+                elif BOID_TYPE == "lights":
+                    SHOW_VISION = True
+                    BOID_TYPE = "invisible"
+                    OLD_BG_COLOR = BG_COLOR
+                    BG_COLOR = (0, 0, 0) 
                 else:
+                    SHOW_VISION = False
+                    BG_COLOR = OLD_BG_COLOR
                     BOID_TYPE = "triangle"
             elif event.key == pygame.K_r:
                 for _ in range(random.randint(1, 100)):
