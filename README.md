@@ -33,6 +33,8 @@ pip install -r requirements.txt
 - `-` - Remove boids
 - `B` - Change boid mode (different filters and styles!)
 - `C` - Change color of boids
+- `G` - Change boid vision type
+- `V` - Show boid vision
 
 ### Change stats
 Well, the code is open-source! So you can play around with it, if you want a low-code solution check out the ALL CAPS variables at the top of `main.py` to edit them, the names are pretty self explanatory. Here are the defaults:

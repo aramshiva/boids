@@ -11,13 +11,15 @@ COLORS = {"BLUE": (12, 18, 226),"RED": (255, 0, 0),"GREEN": (0, 255, 0),"YELLOW"
 HEIGHT = 750
 WIDTH = 1250
 BG_COLOR = (255, 255, 255)
-VISION_COLOR = (200, 200, 200)
-SHOW_VISION = False
+# VISION_COLOR = (200, 200, 200)
+VISION_COLOR = COLORS["YELLOW"]
+SHOW_VISION = True
 BOID_SIZE = 5
 BOID_TYPE = "lights"
 VISION_RADIUS = 20
 BOIDS_COUNT = 1000
 TRANSPARENCY_VALUE = 5
+VISION_TYPE = "circle"
 BOID_COLOR = COLORS["RED"]
 
 class Grid:
@@ -77,10 +79,15 @@ class Boid:
 
     def draw(self, surface):
         if SHOW_VISION:
-            vision_surface = pygame.Surface((2 * VISION_RADIUS, 2 * VISION_RADIUS), pygame.SRCALPHA)
-            vision_surface.set_alpha(TRANSPARENCY_VALUE)
-            pygame.draw.circle(vision_surface, VISION_COLOR, (VISION_RADIUS, VISION_RADIUS), VISION_RADIUS)
-            surface.blit(vision_surface, (int(self.pos['x']) - VISION_RADIUS, int(self.pos['y']) - VISION_RADIUS))
+            if VISION_TYPE == "circle":
+                pygame.draw.circle(surface, VISION_COLOR, (int(self.pos['x']), int(self.pos['y'])), VISION_RADIUS, 1)
+            elif VISION_TYPE == "square":
+                pygame.draw.rect(surface, VISION_COLOR, (int(self.pos['x']) - VISION_RADIUS, int(self.pos['y']) - VISION_RADIUS, 2 * VISION_RADIUS, 2 * VISION_RADIUS))
+            else:
+                vision_surface = pygame.Surface((2 * VISION_RADIUS, 2 * VISION_RADIUS), pygame.SRCALPHA)
+                vision_surface.set_alpha(TRANSPARENCY_VALUE)
+                pygame.draw.circle(vision_surface, VISION_COLOR, (VISION_RADIUS, VISION_RADIUS), VISION_RADIUS)
+                surface.blit(vision_surface, (int(self.pos['x']) - VISION_RADIUS, int(self.pos['y']) - VISION_RADIUS))
         if BOID_TYPE == "invisible":
             pass
         if BOID_TYPE == "triangle":
@@ -254,6 +261,13 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_v:
                 SHOW_VISION = not SHOW_VISION
+            if event.key == pygame.K_g:
+                if VISION_TYPE == "circle":
+                    VISION_TYPE = "square"
+                elif VISION_TYPE == "square":
+                    VISION_TYPE = "lights"
+                elif VISION_TYPE == "lights":
+                    VISION_TYPE = "circle"
             elif event.key == pygame.K_c:
                 BOID_COLOR = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
                 for boid in boids: boid.color = BOID_COLOR
