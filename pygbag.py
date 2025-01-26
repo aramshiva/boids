@@ -3,15 +3,15 @@ import math
 import random
 import numpy as np
 from collections import defaultdict
-import threading
+import asyncio
+import main
 
 pygame.init()
 
-COLORS = {"BLUE": (12, 18, 226),"RED": (255, 0, 0),"GREEN": (0, 255, 0),"YELLOW": (255, 255, 0),"ORANGE": (255, 165, 0),"PURPLE": (128, 0, 128),"PINK": (255, 192, 203),"CYAN": (0, 255, 255),"WHITE": (255, 255, 255),"BLACK": (0, 0, 0),"GRAY": (128, 128, 128),"BROWN": (165, 42, 42), "GRAY": (128, 128, 128)}
+COLORS = {"BLUE": (12, 18, 226), "RED": (255, 0, 0), "GREEN": (0, 255, 0), "YELLOW": (255, 255, 0), "ORANGE": (255, 165, 0), "PURPLE": (128, 0, 128), "PINK": (255, 192, 203), "CYAN": (0, 255, 255), "WHITE": (255, 255, 255), "BLACK": (0, 0, 0), "GRAY": (128, 128, 128), "BROWN": (165, 42, 42)}
 HEIGHT = 750
 WIDTH = 1250
 BG_COLOR = (255, 255, 255)
-# VISION_COLOR = (200, 200, 200)
 VISION_COLOR = COLORS["YELLOW"]
 SHOW_VISION = False
 BOID_SIZE = 5
@@ -102,7 +102,6 @@ class Boid:
             pygame.draw.polygon(surface, self.color, points)
         if BOID_TYPE == "lights":
             BG_COLOR = (3, 8, 172)
-            # BOID_COLOR = (12, 18, 226)
             points = [
             (self.pos['x'] + self.size * math.cos(self.angle),
              self.pos['y'] + self.size * math.sin(self.angle)),
@@ -216,86 +215,92 @@ class Boid:
             self.pos['y'] = HEIGHT + self.size
         elif self.pos['y'] > HEIGHT + self.size:
             self.pos['y'] = -self.size
+
+async def main():
+    global WIDTH, HEIGHT, BG_COLOR, SHOW_VISION, VISION_TYPE, BOID_TYPE, BOID_COLOR
+
+    boids = []
     
-boids = [Boid(random.randint(1, WIDTH), random.randint(1, HEIGHT)) for _ in range(BOIDS_COUNT)]
+    for boid in range(100):
+        boids.append(Boid(random.randint(1, WIDTH), random.randint(1, HEIGHT)))
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
-pygame.display.set_caption("boids")
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+    pygame.display.set_caption("boids")
 
-grid = Grid(VISION_RADIUS)
-running = True
+    grid = Grid(VISION_RADIUS)
+    clock = pygame.time.Clock()
+    running = True
 
-def update_boids():
+    def update_boids():
+        if running:
+            grid.clear()
+            for boid in boids:
+                grid.update_boid(boid)
+            for boid in boids:
+                boid.cached_neighbors = grid.neighbors(boid)
+                boid.update(boid.cached_neighbors)
+
+    def draw_boids():
+        if running:
+            screen.fill(BG_COLOR)
+            for boid in boids:
+                boid.draw(screen)
+            pygame.display.flip()
+
     while running:
-        grid.clear()
-        for boid in boids:
-            grid.update_boid(boid)
-        for boid in boids:
-            boid.cached_neighbors = grid.neighbors(boid)
-            boid.update(boid.cached_neighbors)
-        pygame.time.Clock().tick(60)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                boids.append(Boid(x, y))
+            elif event.type == pygame.VIDEORESIZE:
+                WIDTH, HEIGHT = event.w, event.h
+                screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_v:
+                    SHOW_VISION = not SHOW_VISION
+                if event.key == pygame.K_g:
+                    if VISION_TYPE == "circle":
+                        VISION_TYPE = "square"
+                    elif VISION_TYPE == "square":
+                        VISION_TYPE = "lights"
+                    elif VISION_TYPE == "lights":
+                        VISION_TYPE = "circle"
+                elif event.key == pygame.K_c:
+                    BOID_COLOR = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                    for boid in boids: boid.color = BOID_COLOR
+                elif event.key == pygame.K_b:
+                    if BOID_TYPE == "triangle":
+                        BOID_TYPE = "circle"
+                    elif BOID_TYPE == "circle":
+                        BOID_TYPE = "square"
+                    elif BOID_TYPE == "square":
+                        BOID_TYPE = "lights"
+                    elif BOID_TYPE == "lights":
+                        SHOW_VISION = True
+                        BOID_TYPE = "invisible"
+                        OLD_BG_COLOR = BG_COLOR
+                        BG_COLOR = (0, 0, 0) 
+                    else:
+                        SHOW_VISION = False
+                        BG_COLOR = OLD_BG_COLOR
+                        BOID_TYPE = "triangle"
+                elif event.key == pygame.K_r:
+                    for _ in range(random.randint(1, 100)):
+                        boids.append(Boid(random.randint(1, WIDTH), random.randint(1, HEIGHT)))
+                elif event.key == pygame.K_MINUS:
+                    for _ in range(random.randint(1, 100)):
+                        if boids:
+                            boids.pop()
+        draw_boids()
 
-def draw_boids():
-    while running:
-        screen.fill(BG_COLOR)
-        for boid in boids:
-            boid.draw(screen)
-        pygame.display.flip()
+        update_boids()
+        
+        # give hand to host
+        await asyncio.sleep(0)
 
-update_thread = threading.Thread(target=update_boids)
-draw_thread = threading.Thread(target=draw_boids)
+    pygame.quit()
 
-update_thread.start()
-draw_thread.start()
-
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            x, y = pygame.mouse.get_pos()
-            boids.append(Boid(x, y))
-        elif event.type == pygame.VIDEORESIZE:
-            WIDTH, HEIGHT = event.w, event.h
-            screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_v:
-                SHOW_VISION = not SHOW_VISION
-            if event.key == pygame.K_g:
-                if VISION_TYPE == "circle":
-                    VISION_TYPE = "square"
-                elif VISION_TYPE == "square":
-                    VISION_TYPE = "lights"
-                elif VISION_TYPE == "lights":
-                    VISION_TYPE = "circle"
-            elif event.key == pygame.K_c:
-                BOID_COLOR = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-                for boid in boids: boid.color = BOID_COLOR
-            elif event.key == pygame.K_b:
-                if BOID_TYPE == "triangle":
-                    BOID_TYPE = "circle"
-                elif BOID_TYPE == "circle":
-                    BOID_TYPE = "square"
-                elif BOID_TYPE == "square":
-                    BOID_TYPE = "lights"
-                elif BOID_TYPE == "lights":
-                    SHOW_VISION = True
-                    BOID_TYPE = "invisible"
-                    OLD_BG_COLOR = BG_COLOR
-                    BG_COLOR = (0, 0, 0) 
-                else:
-                    SHOW_VISION = False
-                    BG_COLOR = OLD_BG_COLOR
-                    BOID_TYPE = "triangle"
-            elif event.key == pygame.K_r:
-                for _ in range(random.randint(1, 100)):
-                    boids.append(Boid(random.randint(1, WIDTH), random.randint(1, HEIGHT)))
-            elif event.key == pygame.K_MINUS:
-                for _ in range(random.randint(1, 100)):
-                    if boids:
-                        boids.pop()
-
-update_thread.join()
-draw_thread.join()
-
-pygame.quit()
+if __name__ == "__main__":
+    asyncio.run(main())
