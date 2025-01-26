@@ -1,13 +1,24 @@
-import pygame
+import threading
 import math
 import random
+import pygame
 import numpy as np
 from collections import defaultdict
-import threading
 
 pygame.init()
 
-COLORS = {"BLUE": (12, 18, 226),"RED": (255, 0, 0),"GREEN": (0, 255, 0),"YELLOW": (255, 255, 0),"ORANGE": (255, 165, 0),"PURPLE": (128, 0, 128),"PINK": (255, 192, 203),"CYAN": (0, 255, 255),"WHITE": (255, 255, 255),"BLACK": (0, 0, 0),"GRAY": (128, 128, 128),"BROWN": (165, 42, 42), "GRAY": (128, 128, 128)}
+COLORS = {"BLUE": (12, 18, 226),
+          "RED": (255, 0, 0),
+          "GREEN": (0, 255, 0),
+          "YELLOW": (255, 255, 0),
+          "ORANGE": (255, 165, 0),
+          "PURPLE": (128, 0, 128),
+          "PINK": (255, 192, 203),
+          "CYAN": (0, 255, 255),
+          "WHITE": (255, 255, 255),
+          "BLACK": (0, 0, 0),
+          "BROWN": (165, 42, 42),
+          "GRAY": (128, 128, 128)}
 HEIGHT = 750
 WIDTH = 1250
 BG_COLOR = (255, 255, 255)
