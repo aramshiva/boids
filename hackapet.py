@@ -22,6 +22,7 @@ BOIDS_COUNT = 100
 TRANSPARENCY_VALUE = 5
 VISION_TYPE = "circle"
 BOID_COLOR = COLORS["RED"]
+DISPLAY_START_SCREEN = True
 
 class Grid:
     def __init__(self, cell_size):
@@ -271,8 +272,9 @@ class Boid:
             self.pos['y'] = -self.size
 
 async def main():
-    global WIDTH, HEIGHT, BG_COLOR, VISION_TYPE, BOID_TYPE, BOID_COLOR, SHOW_VISION
+    global BOID_TYPE, BOID_COLOR, SHOW_VISION, DISPLAY_START_SCREEN
     running = True
+    DISPLAY_START_SCREEN = True
 
     boids = []
     
@@ -284,6 +286,11 @@ async def main():
     display.show(display_group)
     running = True
     grid = Grid(VISION_RADIUS)
+    bg = displayio.OnDiskBitmap("startScreenBG.bmp")
+    bg_sprite = displayio.TileGrid(
+        bg, 
+        pixel_shader=bg.pixel_shader
+    )
 
     def update_boids():
         if running:
@@ -296,13 +303,18 @@ async def main():
 
     def draw_boids():
         if running:
-            if len(display_group) > 0:
-                display_group.pop()
-            new_group = displayio.Group()
-            for boid in boids:
-                boid.draw(new_group)
-            display_group.append(new_group)
-            display.refresh()
+            if DISPLAY_START_SCREEN:
+                display_group.append(bg_sprite)
+            else:
+                if bg_sprite in display_group:
+                    display_group.remove(bg_sprite)
+                if len(display_group) > 0:
+                    display_group.pop()
+                new_group = displayio.Group()
+                for boid in boids:
+                    boid.draw(new_group)
+                display_group.append(new_group)
+                display.refresh()
 
 
 
@@ -314,27 +326,42 @@ async def main():
                 x, y = pygame.mouse.get_pos()
                 boids.append(Boid(x, y))
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_v:
-                    SHOW_VISION = not SHOW_VISION
-                elif event.key == pygame.K_c:
-                    BOID_COLOR = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-                    for boid in boids: boid.color = BOID_COLOR
-                elif event.key == pygame.K_r:
-                    for _ in range(random.randint(1, 100)):
-                        boids.append(Boid(random.randint(1, WIDTH), random.randint(1, HEIGHT)))
-                elif event.key == pygame.K_b:
-                    if BOID_TYPE == "triangle":
-                        BOID_TYPE = "square"
-                    elif BOID_TYPE == "square":
-                        BOID_TYPE = "circle"
-                    elif BOID_TYPE == "circle":
-                        BOID_TYPE = "gradient"
-                    else:
-                        BOID_TYPE = "triangle"
-                elif event.key == pygame.K_MINUS:
-                    for _ in range(random.randint(1, 100)):
-                        if boids:
-                            boids.pop()
+                if DISPLAY_START_SCREEN:
+                    DISPLAY_START_SCREEN = False
+                    new_bg = displayio.OnDiskBitmap("BG.bmp")
+                    new_bg_sprite = displayio.TileGrid(new_bg, pixel_shader=new_bg.pixel_shader)
+                    if bg_sprite in display_group:
+                        display_group.remove(bg_sprite)
+                    display_group.pop()
+                    display_group.append(new_bg_sprite)
+                else:
+                    if event.key == pygame.K_v:
+                        SHOW_VISION = not SHOW_VISION
+                    elif event.key == pygame.K_c:
+                        BOID_COLOR = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                        for boid in boids: boid.color = BOID_COLOR
+                    elif event.key == pygame.K_r:
+                        if hasattr(event, 'last_click_time') and pygame.time.get_ticks() - event.last_click_time < 500:
+                            for _ in range(random.randint(1, 20)):
+                                if boids:
+                                    boids.pop()
+                        else:
+                            for _ in range(random.randint(1, 10)):
+                                boids.append(Boid(random.randint(1, WIDTH), random.randint(1, HEIGHT)))
+                        event.last_click_time = pygame.time.get_ticks()
+                    elif event.key == pygame.K_b:
+                        if BOID_TYPE == "triangle":
+                            BOID_TYPE = "square"
+                        elif BOID_TYPE == "square":
+                            BOID_TYPE = "circle"
+                        elif BOID_TYPE == "circle":
+                            BOID_TYPE = "gradient"
+                        else:
+                            BOID_TYPE = "triangle"
+                    elif event.key == pygame.K_MINUS:
+                        for _ in range(random.randint(1, 100)):
+                            if boids:
+                                boids.pop()
         draw_boids()
 
         update_boids()
